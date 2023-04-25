@@ -23,10 +23,10 @@ namespace ExpressedEngine.ExpressedEngine
         private string Title = "New Game";
         private Canvas Window = null;
         private Thread GameLoopThread = null;
+        private static bool IsAlive = true;
 
-
-        private static List<Shape2D> AllShapes = new List<Shape2D>();
         private static List<Sprite2D> AllSprites = new List<Sprite2D>();
+        private static List<Pellite> AllPellites = new List<Pellite>();
         private static int score = 0;
 
         public Vector2 CameraPosition = Vector2.Zero();
@@ -65,28 +65,46 @@ namespace ExpressedEngine.ExpressedEngine
             GetKeyDown(e);
         }
 
-        public static void RegisterShape(Shape2D shape)
-        {
-            AllShapes.Add(shape);
-        }
-
         public static void RegisterSprite(Sprite2D sprite)
         {
-            AllSprites.Add(sprite);
+            if (sprite.Tag == "Pellite")
+            {
+                AllPellites.Add(sprite as  Pellite);
+            }
+            else
+            {
+                AllSprites.Add(sprite);
+            }
+           
         }
 
-        public static void UnRegisterShape(Shape2D shape)
+        public static void UnRegisterPellite(Sprite2D pellite)
         {
-            AllShapes.Remove(shape);
+            Pellite pellite1 = pellite as Pellite;
+            score += pellite1.worth;
+            AllPellites.Remove(pellite1); 
         }
 
         public static void UnRegisterSprite(Sprite2D sprite)
         {
-            if(sprite.Tag == "Pellite")
-            {
-                score += 1;
-            }
             AllSprites.Remove(sprite);
+        }
+
+        public static void IsDead()
+        {
+            IsAlive = false;
+        }
+
+        public static bool IsWon()
+        {
+            if (AllPellites.Count() == 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private void GameLoop()
@@ -113,17 +131,33 @@ namespace ExpressedEngine.ExpressedEngine
 
             g.TranslateTransform(CameraPosition.X, CameraPosition.Y);
 
-            foreach (Shape2D shape in AllShapes)
+            if(IsAlive) {
+                if (!IsWon()) {
+                    foreach (Pellite pellite in AllPellites.ToList())
+                    {
+                        g.DrawImage(pellite.Sprite, pellite.Position.X, pellite.Position.Y, pellite.Scale.X, pellite.Scale.Y);
+                    }
+
+                    foreach (Sprite2D sprite in AllSprites.ToList())
+                    {
+                        g.DrawImage(sprite.Sprite, sprite.Position.X, sprite.Position.Y, sprite.Scale.X, sprite.Scale.Y);
+                    }
+
+                    g.DrawString($"Points:{score}", new Font("Calibri", 20), new SolidBrush(Color.Red), 200, 430);
+                }
+                else
+                {
+                    g.Clear(BackgroundColor);
+                    g.DrawString("You Won! Game Over!", new Font("Calibri", 20), new SolidBrush(Color.Red), 256, 256);
+                    Log.Normal("Game Over");
+                }
+            }
+            else
             {
-                g.FillRectangle(new SolidBrush(Color.Red),shape.Position.X, shape.Position.Y,shape.Scale.X,shape.Scale.Y);
+                g.Clear(BackgroundColor);
             }
 
-            foreach(Sprite2D sprite in AllSprites.ToList())
-            {
-                g.DrawImage(sprite.Sprite,sprite.Position.X,sprite.Position.Y,sprite.Scale.X,sprite.Scale.Y);
-            }
-
-            g.DrawString($"Points:{score}", new Font("Calibri", 20), new SolidBrush(Color.Red), 200, 430);
+            
         }
 
         public abstract void OnLoad();

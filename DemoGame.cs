@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -11,8 +12,8 @@ namespace ExpressedEngine
 {
     class DemoGame : ExpressedEngine.ExpressedEngine
     {
-        Sprite2D player;
-        private static List<Sprite2D> AllPellittes = new List<Sprite2D>();
+        Player player;
+        private static List<Pellite> AllPellittes = new List<Pellite>();
 
         bool left;
         bool right;
@@ -79,16 +80,17 @@ namespace ExpressedEngine
                     }
                     if (Map[j, i] == ".")
                     {
-                        AllPellittes.Add(new Sprite2D(new Vector2(i * 25, j * 25), new Vector2(25, 25), "Pellite", "Pellite"));
+                        AllPellittes.Add(new Pellite(new Vector2(i * 25, j * 25), new Vector2(25, 25), "Pellite", "Pellite",1));
                     }
                 }
             }
 
-            player = new Sprite2D(new Vector2(25, 25), new Vector2(25, 25), "Pacman_mid_right", "Player");
+            player = new Player(new Vector2(25, 25), new Vector2(25, 25), "Pacman_mid_right", "Player",3);
         }
 
         public override void OnUpdate()
         {
+
             mouth_tics += 1;
 
             for(int pel = 0; pel < AllPellittes.Count; pel++) 
@@ -377,7 +379,14 @@ namespace ExpressedEngine
             left = false;
             right = false;
 
-            
+
+            ///TO DO Add Enemy Character to fetch if player has been hit and needs to be killed
+            ///
+
+            if (player.lives == 0)
+            {
+                player.Death();
+            }
         }
     }
 }

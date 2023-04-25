@@ -12,6 +12,7 @@ namespace ExpressedEngine
     class DemoGame : ExpressedEngine.ExpressedEngine
     {
         Sprite2D player;
+        private static List<Sprite2D> AllPellittes = new List<Sprite2D>();
 
         bool left;
         bool right;
@@ -27,10 +28,10 @@ namespace ExpressedEngine
             {"g",".","g","g",".","g","g","g",".","g",".","g",".","g",".","g","g","g",".","g","g",".","g"},
             {"g",".","g","g",".","g","g","g",".","g",".","g",".","g",".","g","g","g",".","g","g",".","g"},
             {"g",".",".",".",".",".",".",".",".","g",".","g",".","g",".",".",".",".",".",".",".",".","g"},
-            {"g",".","g","g",".","g",".","g","g","g",".","g",".","g",".","g",".","g",".","g","g",".","g"},
+            {"g",".","g","g",".","g",".","g","g","g",".","g",".","g","g","g",".","g",".","g","g",".","g"},
             {"g",".",".",".",".","g",".",".",".",".",".",".",".",".",".",".",".","g",".",".",".",".","g"},
-            {"g","g","g","g",".","g","g","g",".","g","g",".","g","g",".","g","g","g",".","g","g","g","g"},
-            {".",".",".",".",".",".",".",".",".","g",".",".",".","g",".",".",".",".",".",".",".",".","."},
+            {"g","g","g","g",".","g","g","g",".","g","g","a","g","g",".","g","g","g",".","g","g","g","g"},
+            {"t",".",".",".",".",".",".",".",".","g","a","a","a","g",".",".",".",".",".",".",".",".","t"},
             {"g","g","g","g",".","g","g","g",".","g","g","g","g","g",".","g","g","g",".","g","g","g","g"},
             {"g",".",".",".",".","g",".",".",".",".",".",".",".",".",".",".",".","g",".",".",".",".","g"},
             {"g",".","g","g",".","g",".","g","g","g",".","g",".","g","g","g",".","g",".","g","g",".","g"},
@@ -67,10 +68,6 @@ namespace ExpressedEngine
         {
             BackgroundColor = Color.Black;
 
-
-            //player = new Shape2D(new Vector2(10,10),new Vector2(10,10),"Test");
-            player = new Sprite2D(new Vector2(25,25),new Vector2(25,25),"pacman_open_right","Player");
-
             for(int i = 0; i < Map.GetLength(1); i++)
             {
                 for (int j = 0; j < Map.GetLength(0); j++)
@@ -79,12 +76,23 @@ namespace ExpressedEngine
                     {
                         new Sprite2D(new Vector2(i*25, j*25), new Vector2(25, 25), "BlockTile", "Ground");
                     }
+                    if (Map[j, i] == ".")
+                    {
+                        AllPellittes.Add(new Sprite2D(new Vector2(i * 25, j * 25), new Vector2(25, 25), "Pellite", "Pellite"));
+                    }
                 }
             }
+
+            player = new Sprite2D(new Vector2(25, 25), new Vector2(25, 25), "pacman_open_right", "Player");
         }
 
         public override void OnUpdate()
         {
+            for(int pel = 0; pel < AllPellittes.Count; pel++) 
+            { 
+                if(player.Position.X == AllPellittes[pel].Position.X && player.Position.Y == AllPellittes[pel].Position.Y) { AllPellittes[pel].DestroySelf(); AllPellittes.RemoveAt(pel); }
+            }
+
             if(player.Position.X > 0 && player.Position.X < 5)
             {
                 if(player.Position.Y > (8 * 25) - 2.5 && player.Position.Y < (8 * 25) + 2.5)
@@ -179,7 +187,6 @@ namespace ExpressedEngine
                 
                
             }
-
 
 
             if(!up && !down && !left && !right)

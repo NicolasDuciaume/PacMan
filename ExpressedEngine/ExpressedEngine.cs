@@ -27,6 +27,7 @@ namespace ExpressedEngine.ExpressedEngine
 
         private static List<Shape2D> AllShapes = new List<Shape2D>();
         private static List<Sprite2D> AllSprites = new List<Sprite2D>();
+        private static int score = 0;
 
         public Vector2 CameraPosition = Vector2.Zero();
 
@@ -81,6 +82,10 @@ namespace ExpressedEngine.ExpressedEngine
 
         public static void UnRegisterSprite(Sprite2D sprite)
         {
+            if(sprite.Tag == "Pellite")
+            {
+                score += 1;
+            }
             AllSprites.Remove(sprite);
         }
 
@@ -118,6 +123,7 @@ namespace ExpressedEngine.ExpressedEngine
                 g.DrawImage(sprite.Sprite,sprite.Position.X,sprite.Position.Y,sprite.Scale.X,sprite.Scale.Y);
             }
 
+            g.DrawString($"Points:{score}", new Font("Calibri", 20), new SolidBrush(Color.Red), 200, 430);
         }
 
         public abstract void OnLoad();

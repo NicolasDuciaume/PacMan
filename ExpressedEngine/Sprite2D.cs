@@ -35,15 +35,6 @@ namespace ExpressedEngine.ExpressedEngine
 
         }
 
-        public void UpdateSprite(string directory)
-        {
-            this.Directory = directory;
-            Image tmp = Image.FromFile($"Assets/Sprites/{Directory}.png");
-            Bitmap sprite = new Bitmap(tmp, (int)this.Scale.X, (int)this.Scale.Y);
-
-            Sprite = sprite;
-        }
-
         public void DestroySelf()
         {
             Log.Info($"[SPRITE2D]({Tag}) - Has been Destroyed");

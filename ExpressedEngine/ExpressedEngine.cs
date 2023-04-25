@@ -143,18 +143,22 @@ namespace ExpressedEngine.ExpressedEngine
                         g.DrawImage(sprite.Sprite, sprite.Position.X, sprite.Position.Y, sprite.Scale.X, sprite.Scale.Y);
                     }
 
-                    g.DrawString($"Points:{score}", new Font("Calibri", 20), new SolidBrush(Color.Red), 200, 430);
+                    g.DrawString($"Points:{score}", new Font("Calibri", 15), new SolidBrush(Color.Red), 5, 425);
                 }
                 else
                 {
                     g.Clear(BackgroundColor);
-                    g.DrawString("You Won! Game Over!", new Font("Calibri", 20), new SolidBrush(Color.Red), 256, 256);
+                    g.DrawString("You Won! Game Over!", new Font("Calibri", 20), new SolidBrush(Color.Red), 190, 200);
+                    Log.Normal("You Won!");
                     Log.Normal("Game Over");
                 }
             }
             else
             {
                 g.Clear(BackgroundColor);
+                g.DrawString("You Died! Game Over!", new Font("Calibri", 20), new SolidBrush(Color.Red), 190, 200);
+                Log.Normal("You Lost");
+                Log.Normal("Game Over");
             }
 
             

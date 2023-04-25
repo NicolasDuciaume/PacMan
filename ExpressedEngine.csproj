@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DemoGame.cs" />
+    <Compile Include="ExpressedEngine\Enemy.cs" />
     <Compile Include="ExpressedEngine\ExpressedEngine.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -14,13 +14,15 @@ namespace ExpressedEngine
     {
         Player player;
         private static List<Pellite> AllPellittes = new List<Pellite>();
+        private static List<Enemy> AllEnemys = new List<Enemy>();
+        private static List<Sprite2D> Health = new List<Sprite2D>();
 
         bool left;
         bool right;
         bool up;
         bool down;
-        string previousAccepted = "right";
-        string awaitingAccepted = "right";
+        string previousAccepted = "";
+        string awaitingAccepted = "";
         int mouth_tics = 1;
 
         string[,] Map =
@@ -32,8 +34,8 @@ namespace ExpressedEngine
             {"g",".",".",".",".",".",".",".",".","g",".","g",".","g",".",".",".",".",".",".",".",".","g"},
             {"g",".","g","g",".","g",".","g","g","g",".","g",".","g","g","g",".","g",".","g","g",".","g"},
             {"g",".",".",".",".","g",".",".",".",".",".",".",".",".",".",".",".","g",".",".",".",".","g"},
-            {"g","g","g","g",".","g","g","g",".","g","g","a","g","g",".","g","g","g",".","g","g","g","g"},
-            {"t",".",".",".",".",".",".",".",".","g","a","a","a","g",".",".",".",".",".",".",".",".","t"},
+            {"g","g","g","g",".","g","g","g",".","g","g","a1","g","g",".","g","g","g",".","g","g","g","g"},
+            {"t",".",".",".",".",".",".",".",".","g","a3","a2","a4","g",".",".",".",".",".",".",".",".","t"},
             {"g","g","g","g",".","g","g","g",".","g","g","g","g","g",".","g","g","g",".","g","g","g","g"},
             {"g",".",".",".",".","g",".",".",".",".",".",".",".",".",".",".",".","g",".",".",".",".","g"},
             {"g",".","g","g",".","g",".","g","g","g",".","g",".","g","g","g",".","g",".","g","g",".","g"},
@@ -82,39 +84,58 @@ namespace ExpressedEngine
                     {
                         AllPellittes.Add(new Pellite(new Vector2(i * 25, j * 25), new Vector2(25, 25), "Pellite", "Pellite",1));
                     }
+                    if (Map[j, i] == "a1" || Map[j, i] == "a2")
+                    {
+                        AllEnemys.Add(new Enemy(new Vector2(i * 25, j * 25), new Vector2(25, 25), "Enemy_up", "Enemy","up"));
+                    }
+                    if (Map[j, i] == "a3")
+                    {
+                        AllEnemys.Add(new Enemy(new Vector2(i * 25, j * 25), new Vector2(25, 25), "Enemy_right", "Enemy", "right"));
+                    }
+                    if (Map[j, i] == "a4")
+                    {
+                        AllEnemys.Add(new Enemy(new Vector2(i * 25, j * 25), new Vector2(25, 25), "Enemy_left", "Enemy", "left"));
+                    }
                 }
             }
 
-            player = new Player(new Vector2(25, 25), new Vector2(25, 25), "Pacman_mid_right", "Player",3);
+            player = new Player(new Vector2(275, 250), new Vector2(25, 25), "Pacman_mid_right", "Player",3);
+
+            Health.Add(new Sprite2D(new Vector2(500, 430), new Vector2(15, 15), "Pacman_mid_right", "Health"));
+            Health.Add(new Sprite2D(new Vector2(525, 430), new Vector2(15, 15), "Pacman_mid_right", "Health"));
+            Health.Add(new Sprite2D(new Vector2(550, 430), new Vector2(15, 15), "Pacman_mid_right", "Health"));
         }
 
-        public override void OnUpdate()
+        public void PelliteHitDetection()
         {
-
-            mouth_tics += 1;
-
-            for(int pel = 0; pel < AllPellittes.Count; pel++) 
-            { 
-                if(player.Position.X == AllPellittes[pel].Position.X && player.Position.Y == AllPellittes[pel].Position.Y) { AllPellittes[pel].DestroySelf(); AllPellittes.RemoveAt(pel); }
-            }
-
-            if(player.Position.X > 0 && player.Position.X < 5)
+            for (int pel = 0; pel < AllPellittes.Count; pel++)
             {
-                if(player.Position.Y > (8 * 25) - 2.5 && player.Position.Y < (8 * 25) + 2.5)
+                if (player.Position.X == AllPellittes[pel].Position.X && player.Position.Y == AllPellittes[pel].Position.Y) { AllPellittes[pel].DestroySelf(); AllPellittes.RemoveAt(pel); }
+            }
+        }
+
+        public void TeleporterHitDetection(Sprite2D character)
+        {
+            if (character.Position.X > 0 && character.Position.X < 5)
+            {
+                if (character.Position.Y > (8 * 25) - 2.5 && character.Position.Y < (8 * 25) + 2.5)
                 {
-                    player.Position.X = (22*25) - 7;
+                    character.Position.X = (22 * 25) - 7;
                 }
             }
 
-            if (player.Position.X > (22 * 25) && player.Position.X < (22 * 25) + 5)
+            if (character.Position.X > (22 * 25) && character.Position.X < (22 * 25) + 5)
             {
-                if (player.Position.Y > (8 * 25) - 2.5 && player.Position.Y < (8 * 25) + 2.5)
+                if (character.Position.Y > (8 * 25) - 2.5 && character.Position.Y < (8 * 25) + 2.5)
                 {
-                    player.Position.X = 7;
+                    character.Position.X = 7;
                 }
             }
+        }
 
-            if(previousAccepted != awaitingAccepted)
+        public void PlayerMovement()
+        {
+            if (previousAccepted != awaitingAccepted)
             {
                 bool is_in_way2 = false;
                 for (int i = 0; i < Map.GetLength(1); i++)
@@ -126,7 +147,7 @@ namespace ExpressedEngine
                             float Block_X = i * 25;
                             float Block_Y = j * 25;
 
-                            if (awaitingAccepted =="up")
+                            if (awaitingAccepted == "up")
                             {
                                 if (player.Position.X > Block_X - 25 && player.Position.X < Block_X + 25 && player.Position.Y - 1f > Block_Y - 25 && player.Position.Y - 1f < Block_Y + 25)
                                 {
@@ -145,7 +166,7 @@ namespace ExpressedEngine
                                 }
                             }
 
-                            if (awaitingAccepted=="right")
+                            if (awaitingAccepted == "right")
 
                             {
                                 if (player.Position.X + 1f > Block_X - 25 && player.Position.X + 1f < Block_X + 25 && player.Position.Y > Block_Y - 25 && player.Position.Y < Block_Y + 25)
@@ -155,7 +176,7 @@ namespace ExpressedEngine
                                 }
                             }
 
-                            if (awaitingAccepted=="left")
+                            if (awaitingAccepted == "left")
                             {
                                 if (player.Position.X - 1f > Block_X - 25 && player.Position.X - 1f < Block_X + 25 && player.Position.Y > Block_Y - 25 && player.Position.Y < Block_Y + 25)
                                 {
@@ -171,7 +192,8 @@ namespace ExpressedEngine
                     }
                 }
 
-                if (!is_in_way2) {
+                if (!is_in_way2)
+                {
                     switch (awaitingAccepted)
                     {
                         case "right":
@@ -183,18 +205,17 @@ namespace ExpressedEngine
                         case "down":
                             right = false; left = false; up = false; down = true; break;
                         default:
-                            Console.WriteLine("error");
                             break;
 
                     }
                     previousAccepted = awaitingAccepted;
                 }
-                
-               
+
+
             }
 
 
-            if(!up && !down && !left && !right)
+            if (!up && !down && !left && !right)
             {
                 switch (previousAccepted)
                 {
@@ -207,7 +228,6 @@ namespace ExpressedEngine
                     case "down":
                         right = false; left = false; up = false; down = true; break;
                     default:
-                        Console.WriteLine("error");
                         break;
 
                 }
@@ -222,7 +242,7 @@ namespace ExpressedEngine
                     {
                         float Block_X = i * 25;
                         float Block_Y = j * 25;
-                        
+
                         if (up)
                         {
                             if (player.Position.X > Block_X - 25 && player.Position.X < Block_X + 25 && player.Position.Y - 1f > Block_Y - 25 && player.Position.Y - 1f < Block_Y + 25)
@@ -231,7 +251,7 @@ namespace ExpressedEngine
                                 is_in_way = true;
                                 break;
                             }
-                            
+
                         }
 
                         if (down)
@@ -256,7 +276,7 @@ namespace ExpressedEngine
 
                         if (left)
                         {
-                            if (player.Position.X - 1f > Block_X - 25 && player.Position.X -1f < Block_X + 25 && player.Position.Y > Block_Y - 25 && player.Position.Y < Block_Y + 25)
+                            if (player.Position.X - 1f > Block_X - 25 && player.Position.X - 1f < Block_X + 25 && player.Position.Y > Block_Y - 25 && player.Position.Y < Block_Y + 25)
                             {
                                 awaitingAccepted = "left";
                                 is_in_way = true;
@@ -271,89 +291,12 @@ namespace ExpressedEngine
                 }
             }
 
-            switch (mouth_tics)
-            {
-                case 1:
-                    switch (previousAccepted)
-                    {
-                        case "right":
-                            player.UpdateSprite("PacMan_mid_right");
-                            break;
-                        case "left":
-                            player.UpdateSprite("PacMan_mid_left");
-                            break;
-                        case "up":
-                            player.UpdateSprite("PacMan_mid_up");
-                            break;
-                        case "down":
-                            player.UpdateSprite("PacMan_mid_down");
-                            break;
-                        default:
-                            Console.WriteLine("error");
-                            break;
-
-                    }
-                    break;
-                case 8:
-                    switch (previousAccepted)
-                    {
-                        case "right":
-                            player.UpdateSprite("PacMan_open_right");
-                            break;
-                        case "left":
-                            player.UpdateSprite("PacMan_open_left");
-                            break;
-                        case "up":
-                            player.UpdateSprite("PacMan_open_up");
-                            break;
-                        case "down":
-                            player.UpdateSprite("PacMan_open_down");
-                            break;
-                        default:
-                            Console.WriteLine("error");
-                            break;
-
-                    }
-                    break;
-                case 13:
-                    switch (previousAccepted)
-                    {
-                        case "right":
-                            player.UpdateSprite("PacMan_mid_right");
-                            break;
-                        case "left":
-                            player.UpdateSprite("PacMan_mid_left");
-                            break;
-                        case "up":
-                            player.UpdateSprite("PacMan_mid_up");
-                            break;
-                        case "down":
-                            player.UpdateSprite("PacMan_mid_down");
-                            break;
-                        default:
-                            Console.WriteLine("error");
-                            break;
-
-                    }
-                    break;
-                case 18:
-                    player.UpdateSprite("PacMan_closed");
-                    break;
-                case 24:
-                    mouth_tics = 0;
-                    break;
-                default:
-                    break;
-
-            }
-
-
             if (up)
             {
                 previousAccepted = "up";
                 //player.UpdateSprite("pacman_open_up");
                 if (!is_in_way) { player.Position.Y -= 1f; }
-                
+
             }
             if (down)
             {
@@ -378,10 +321,267 @@ namespace ExpressedEngine
             down = false;
             left = false;
             right = false;
+        }
 
+        public string EnemyMovementOptions(string awaitingAcceptedEnemy, Enemy enemy)
+        {
+            bool is_in_way2 = false;
+            for (int i = 0; i < Map.GetLength(1); i++)
+            {
+                for (int j = 0; j < Map.GetLength(0); j++)
+                {
+                    if (Map[j, i] == "g")
+                    {
+                        float Block_X = i * 25;
+                        float Block_Y = j * 25;
+
+                        if (awaitingAcceptedEnemy == "up")
+                        {
+                            if (enemy.Position.X > Block_X - 25 && enemy.Position.X < Block_X + 25 && enemy.Position.Y - 1f > Block_Y - 25 && enemy.Position.Y - 1f < Block_Y + 25)
+                            {
+                                is_in_way2 = true;
+                                break;
+                            }
+
+                        }
+
+                        if (awaitingAcceptedEnemy == "down")
+                        {
+                            if (enemy.Position.X > Block_X - 25 && enemy.Position.X < Block_X + 25 && enemy.Position.Y + 1f > Block_Y - 25 && enemy.Position.Y + 1f < Block_Y + 25)
+                            {
+                                is_in_way2 = true;
+                                break;
+                            }
+                        }
+
+                        if (awaitingAcceptedEnemy == "right")
+
+                        {
+                            if (enemy.Position.X + 1f > Block_X - 25 && enemy.Position.X + 1f < Block_X + 25 && enemy.Position.Y > Block_Y - 25 && enemy.Position.Y < Block_Y + 25)
+                            {
+                                is_in_way2 = true;
+                                break;
+                            }
+                        }
+
+                        if (awaitingAcceptedEnemy == "left")
+                        {
+                            if (enemy.Position.X - 1f > Block_X - 25 && enemy.Position.X - 1f < Block_X + 25 && enemy.Position.Y > Block_Y - 25 && enemy.Position.Y < Block_Y + 25)
+                            {
+                                is_in_way2 = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!is_in_way2) 
+            { 
+                return awaitingAcceptedEnemy;
+            }
+            else {  return ""; }
+        }
+
+        public void EnemyMovement()
+        {
+            foreach (Enemy enemy in AllEnemys.ToList())
+            {
+                List<string> movementsEnemy = new List<string>();
+
+                if (EnemyMovementOptions("right", enemy) != "")
+                {
+                    movementsEnemy.Add("right");
+                }
+                if (EnemyMovementOptions("left", enemy) != "")
+                {
+                    movementsEnemy.Add("left");
+                }
+                if (EnemyMovementOptions("up", enemy) != "")
+                {
+                    movementsEnemy.Add("up");
+                }
+                if (EnemyMovementOptions("down", enemy) != "")
+                {
+                    movementsEnemy.Add("down");
+                }
+
+                switch (enemy.pickMovement(movementsEnemy.ToArray()))
+                {
+                    case "right":
+                        enemy.UpdateSprite("Enemy_right");
+                        enemy.Position.X += 1f;
+                        break;
+                    case "left":
+                        enemy.UpdateSprite("Enemy_left");
+                        enemy.Position.X -= 1f;
+                        break;
+                    case "up":
+                        enemy.UpdateSprite("Enemy_up");
+                        enemy.Position.Y -= 1f;
+                        break;
+                    case "down":
+                        enemy.UpdateSprite("Enemy_down");
+                        enemy.Position.Y += 1f;
+                        break;
+                    default: break;
+                }
+                
+            }
+        }
+
+        public void PlayerMouthAnimation()
+        {
+            mouth_tics += 1;
+            switch (mouth_tics)
+            {
+                case 1:
+                    switch (previousAccepted)
+                    {
+                        case "right":
+                            player.UpdateSprite("PacMan_mid_right");
+                            break;
+                        case "left":
+                            player.UpdateSprite("PacMan_mid_left");
+                            break;
+                        case "up":
+                            player.UpdateSprite("PacMan_mid_up");
+                            break;
+                        case "down":
+                            player.UpdateSprite("PacMan_mid_down");
+                            break;
+                        default:
+                            break;
+
+                    }
+                    break;
+                case 8:
+                    switch (previousAccepted)
+                    {
+                        case "right":
+                            player.UpdateSprite("PacMan_open_right");
+                            break;
+                        case "left":
+                            player.UpdateSprite("PacMan_open_left");
+                            break;
+                        case "up":
+                            player.UpdateSprite("PacMan_open_up");
+                            break;
+                        case "down":
+                            player.UpdateSprite("PacMan_open_down");
+                            break;
+                        default:
+                            break;
+
+                    }
+                    break;
+                case 13:
+                    switch (previousAccepted)
+                    {
+                        case "right":
+                            player.UpdateSprite("PacMan_mid_right");
+                            break;
+                        case "left":
+                            player.UpdateSprite("PacMan_mid_left");
+                            break;
+                        case "up":
+                            player.UpdateSprite("PacMan_mid_up");
+                            break;
+                        case "down":
+                            player.UpdateSprite("PacMan_mid_down");
+                            break;
+                        default:
+                            break;
+
+                    }
+                    break;
+                case 18:
+                    player.UpdateSprite("PacMan_closed");
+                    break;
+                case 24:
+                    mouth_tics = 0;
+                    break;
+                default:
+                    break;
+
+            }
+        }
+
+        public override void OnUpdate()
+        {
+
+            PelliteHitDetection();
+
+            PlayerMovement();
+
+            TeleporterHitDetection(player);
+
+            PlayerMouthAnimation();
+
+            EnemyMovement();
+
+            foreach(Enemy enemy in AllEnemys)
+            {
+                TeleporterHitDetection(enemy);
+                if(enemy.Position.X > player.Position.X) {
+                    if(enemy.Position.Y > player.Position.Y)
+                    {
+                        if ((enemy.Position.X - player.Position.X < 10 && enemy.Position.Y - player.Position.Y < 10))
+                        {
+                            int livesPrevious = player.lives;
+                            player.DestroySelf();
+                            Health[Health.Count - 1].DestroySelf();
+                            Health.RemoveAt(Health.Count - 1);
+                            player = new Player(new Vector2(275, 250), new Vector2(25, 25), "Pacman_mid_right", "Player", livesPrevious - 1);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if ((enemy.Position.X - player.Position.X < 10 && player.Position.Y - enemy.Position.Y < 10))
+                        {
+                            int livesPrevious = player.lives;
+                            player.DestroySelf();
+                            Health[Health.Count - 1].DestroySelf();
+                            Health.RemoveAt(Health.Count - 1);
+                            player = new Player(new Vector2(275, 250), new Vector2(25, 25), "Pacman_mid_right", "Player", livesPrevious - 1);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    if (enemy.Position.Y > player.Position.Y)
+                    {
+                        if ((player.Position.X - enemy.Position.X < 10 && enemy.Position.Y - player.Position.Y < 10))
+                        {
+                            int livesPrevious = player.lives;
+                            player.DestroySelf();
+                            Health[Health.Count - 1].DestroySelf();
+                            Health.RemoveAt(Health.Count - 1);
+                            player = new Player(new Vector2(275, 250), new Vector2(25, 25), "Pacman_mid_right", "Player", livesPrevious - 1);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        if ((player.Position.X - enemy.Position.X < 10 && player.Position.Y - enemy.Position.Y < 10))
+                        {
+                            int livesPrevious = player.lives;
+                            player.DestroySelf();
+                            Health[Health.Count - 1].DestroySelf();
+                            Health.RemoveAt(Health.Count - 1);
+                            player = new Player(new Vector2(275, 250), new Vector2(25, 25), "Pacman_mid_right", "Player", livesPrevious - 1);
+                            break;
+                        }
+                    }
+                }
+                
+            }
 
             ///TO DO Add Enemy Character to fetch if player has been hit and needs to be killed
             ///
+            
 
             if (player.lives == 0)
             {

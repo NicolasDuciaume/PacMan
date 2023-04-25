@@ -20,6 +20,7 @@ namespace ExpressedEngine
         bool down;
         string previousAccepted = "right";
         string awaitingAccepted = "right";
+        int mouth_tics = 1;
 
         string[,] Map =
         {
@@ -83,11 +84,13 @@ namespace ExpressedEngine
                 }
             }
 
-            player = new Sprite2D(new Vector2(25, 25), new Vector2(25, 25), "pacman_open_right", "Player");
+            player = new Sprite2D(new Vector2(25, 25), new Vector2(25, 25), "Pacman_mid_right", "Player");
         }
 
         public override void OnUpdate()
         {
+            mouth_tics += 1;
+
             for(int pel = 0; pel < AllPellittes.Count; pel++) 
             { 
                 if(player.Position.X == AllPellittes[pel].Position.X && player.Position.Y == AllPellittes[pel].Position.Y) { AllPellittes[pel].DestroySelf(); AllPellittes.RemoveAt(pel); }
@@ -266,29 +269,106 @@ namespace ExpressedEngine
                 }
             }
 
+            switch (mouth_tics)
+            {
+                case 1:
+                    switch (previousAccepted)
+                    {
+                        case "right":
+                            player.UpdateSprite("PacMan_mid_right");
+                            break;
+                        case "left":
+                            player.UpdateSprite("PacMan_mid_left");
+                            break;
+                        case "up":
+                            player.UpdateSprite("PacMan_mid_up");
+                            break;
+                        case "down":
+                            player.UpdateSprite("PacMan_mid_down");
+                            break;
+                        default:
+                            Console.WriteLine("error");
+                            break;
+
+                    }
+                    break;
+                case 8:
+                    switch (previousAccepted)
+                    {
+                        case "right":
+                            player.UpdateSprite("PacMan_open_right");
+                            break;
+                        case "left":
+                            player.UpdateSprite("PacMan_open_left");
+                            break;
+                        case "up":
+                            player.UpdateSprite("PacMan_open_up");
+                            break;
+                        case "down":
+                            player.UpdateSprite("PacMan_open_down");
+                            break;
+                        default:
+                            Console.WriteLine("error");
+                            break;
+
+                    }
+                    break;
+                case 13:
+                    switch (previousAccepted)
+                    {
+                        case "right":
+                            player.UpdateSprite("PacMan_mid_right");
+                            break;
+                        case "left":
+                            player.UpdateSprite("PacMan_mid_left");
+                            break;
+                        case "up":
+                            player.UpdateSprite("PacMan_mid_up");
+                            break;
+                        case "down":
+                            player.UpdateSprite("PacMan_mid_down");
+                            break;
+                        default:
+                            Console.WriteLine("error");
+                            break;
+
+                    }
+                    break;
+                case 18:
+                    player.UpdateSprite("PacMan_closed");
+                    break;
+                case 24:
+                    mouth_tics = 0;
+                    break;
+                default:
+                    break;
+
+            }
+
+
             if (up)
             {
                 previousAccepted = "up";
-                player.UpdateSprite("pacman_open_up");
+                //player.UpdateSprite("pacman_open_up");
                 if (!is_in_way) { player.Position.Y -= 1f; }
                 
             }
             if (down)
             {
                 previousAccepted = "down";
-                player.UpdateSprite("pacman_open_down");
+                //player.UpdateSprite("pacman_open_down");
                 if (!is_in_way) { player.Position.Y += 1f; }
             }
             if (right)
             {
                 previousAccepted = "right";
-                player.UpdateSprite("pacman_open_right");
+                //player.UpdateSprite("pacman_open_right");
                 if (!is_in_way) { player.Position.X += 1f; }
             }
             if (left)
             {
                 previousAccepted = "left";
-                player.UpdateSprite("pacman_open_left");
+                //player.UpdateSprite("pacman_open_left");
                 if (!is_in_way) { player.Position.X -= 1f; }
             }
 
